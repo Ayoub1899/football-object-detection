@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <!-- Paramètres de base de la page -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse de foot en temps réel</title>
+
+    <!-- Feuilles de style externes (Bootstrap, Animate.css, Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+
+    <!-- Feuille de style personnalisée -->
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <!-- Conteneur principal -->
+    <div class="main-container container">
+
+        <!-- Bouton retour à l'accueil -->
+        <div class="home-button">
+            <a href="{{ url_for('home') }}" class="btn btn-light animate__animated animate__fadeIn">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+        </div>
+
+        <!-- Titre principal -->
+        <h1 class="page-title animate__animated animate__fadeInDown">Détection de joueurs, arbitres et ballon en temps réel</h1>
+
+        <div class="row">
+            <!-- Colonne principale avec le flux vidéo -->
+            <div class="col-lg-8 animate__animated animate__fadeInLeft">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-video me-2"></i> Vidéo en traitement
+                    </div>
+                    <div class="card-body">
+                        <div class="video-container">
+                            <!-- Affichage du flux vidéo -->
+                            <img src="{{ url_for('video_feed') }}" class="video-feed" alt="Video Feed">
+
+                            <!-- Affichage du statut -->
+                            <div class="status-display mt-3">
+                                <div id="status-badge" class="status-badge bg-primary" data-status="{{ status }}">
+                                    <i class="fas fa-circle-notch"></i> {{ status }}
+                                </div>
+                                <div id="processing-spinner" class="spinner-border processing-spinner text-primary" role="status" style="display: none;">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contrôles pour stopper ou télécharger la vidéo -->
+                        <div class="controls mt-4">
+                            <button id="stop-btn" class="btn btn-danger animate__animated animate__bounceIn" style="display: none;">
+                                <i class="fas fa-stop me-2"></i> Arrêter
+                            </button>
+                            <a id="download-btn" class="btn btn-success animate__animated animate__bounceIn" style="display: none;">
+                                <i class="fas fa-download me-2"></i> Télécharger
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne latérale pour upload et liste des vidéos -->
+            <div class="col-lg-4 animate__animated animate__fadeInRight">
+                <!-- Formulaire d'upload -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-upload me-2"></i> Uploader une vidéo
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-section">
+                            <form id="upload-form" action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+                                <div class="upload-area" id="drop-area">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <h5>Glissez et déposez votre vidéo ici</h5>
+                                    <p>ou</p>
+                                    <!-- Bouton de sélection de fichier -->
+                                    <button type="button" class="btn btn-primary select-file-btn">
+                                        <i class="fas fa-file-video me-2"></i> Sélectionner un fichier
+                                    </button>
+                                    <input type="file" name="file" id="file-input" class="file-input" accept=".mp4,.avi,.mov,.mkv">
+                                    <div class="file-name mt-2"></div>
+                                </div>
+
+                                <!-- Barre de progression de l'upload -->
+                                <div class="progress-container">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-text text-center mt-2">0%</div>
+                                </div>
+
+                                <button type="submit" id="upload-btn" class="btn btn-primary w-100 mt-3" disabled>
+                                    <i class="fas fa-upload me-2"></i> Traiter
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des vidéos traitées -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-film me-2"></i> Vidéos traitées
+                    </div>
+                    <div class="card-body">
+                        <div class="video-list">
+                            {% if processed_videos %}
+                                {% for video in processed_videos %}
+                                <div class="video-item animate__animated animate__fadeIn">
+                                    <div class="video-name">
+                                        <i class="fas fa-film video-icon"></i>
+                                        <span>{{ video }}</span>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <!-- Téléchargement de la vidéo -->
+                                        <a href="{{ url_for('download_file', filename=video) }}" class="action-btn download" data-bs-toggle="tooltip" title="Télécharger">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <!-- Suppression de la vidéo -->
+                                        <a href="{{ url_for('delete_processed', filename=video) }}" class="action-btn delete" data-bs-toggle="tooltip" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <!-- État vide si aucune vidéo traitée -->
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fas fa-film"></i>
+                                    </div>
+                                    <p>Aucune vidéo traitée pour le moment</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JS (jQuery, Bootstrap) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script JS principal pour interactions dynamiques -->
+    <script>
+        $(document).ready(function() {
+            // Tooltips Bootstrap
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+
+            let statusInterval = null;
+
+            // Met à jour l'icône de statut en fonction de son état
+            function updateStatusIcon(status) {
+                const statusBadge = $('#status-badge');
+                let icon = '';
+                switch(status) {
+                    case 'idle': icon = '<i class="fas fa-check-circle me-2"></i>'; break;
+                    case 'processing': icon = '<i class="fas fa-cog fa-spin me-2"></i>'; break;
+                    case 'saving': icon = '<i class="fas fa-save me-2"></i>'; break;
+                    case 'completed': icon = '<i class="fas fa-check-circle me-2"></i>'; break;
+                    default: icon = '<i class="fas fa-info-circle me-2"></i>';
+                }
+                statusBadge.html(icon + status);
+            }
+
+            // Contrôle d'affichage des boutons selon l'état
+            function updateControlVisibility(status) {
+                if (status === 'processing' || status === 'saving') {
+                    $('#stop-btn').show().removeClass('animate__bounceOut').addClass('animate__bounceIn');
+                } else {
+                    $('#stop-btn').removeClass('animate__bounceIn').addClass('animate__bounceOut');
+                    setTimeout(() => $('#stop-btn').hide(), 700);
+                }
+
+                if (status === 'completed') {
+                    $('#download-btn').show().removeClass('animate__bounceOut').addClass('animate__bounceIn').addClass('pulse');
+                } else {
+                    $('#download-btn').removeClass('animate__bounceIn pulse').addClass('animate__bounceOut');
+                    setTimeout(() => $('#download-btn').hide(), 700);
+                }
+            }
+
+            // Remet le flux vidéo à zéro
+            function resetVideoFeed() {
+                $('.video-feed').attr('src', '#');
+                updateStatusDisplay('idle');
+                updateControlVisibility('idle');
+                $('#processing-spinner').hide();
+            }
+
+            // Drag & drop : gestion des événements
+            const dropArea = document.getElementById('drop-area');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => dropArea.addEventListener(evt, preventDefaults, false));
+            function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+            ['dragenter', 'dragover'].forEach(evt => dropArea.addEventListener(evt, () => dropArea.classList.add('dragover'), false));
+            ['dragleave', 'drop'].forEach(evt => dropArea.addEventListener(evt, () => dropArea.classList.remove('dragover'), false));
+
+            dropArea.addEventListener('drop', function(e) {
+                const files = e.dataTransfer.files;
+                document.getElementById('file-input').files = files;
+                updateFileName();
+            });
+
+            // Sélection de fichier manuelle
+            $('.select-file-btn').click(() => $('#file-input').click());
+            $('#file-input').change(updateFileName);
+            function updateFileName() {
+                const input = document.getElementById('file-input');
+                const name = $('.file-name');
+                if (input.files.length > 0) {
+                    name.text(input.files[0].name);
+                    $('#upload-btn').prop('disabled', false);
+                } else {
+                    name.text('');
+                    $('#upload-btn').prop('disabled', true);
+                }
+            }
+
+            // Gestion de l'envoi AJAX du formulaire d'upload
+            $('#upload-form').on('submit', function(e) {
+                e.preventDefault();
+                const form = $(this);
+                const fileInput = document.getElementById('file-input');
+                if (fileInput.files.length === 0) return;
+
+                const formData = new FormData(form[0]);
+                $('.progress-container').slideDown();
+
+                // Animation de progression
+                let progress = 0;
+                const bar = $('.progress-bar'), txt = $('.progress-text');
+                const interval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress > 95) clearInterval(interval);
+                    bar.css('width', progress + '%');
+                    txt.text(Math.round(progress) + '%');
+                }, 300);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function() {
+                        clearInterval(interval);
+                        bar.css('width', '100%');
+                        txt.text('100%');
+                        setTimeout(() => {
+                            updateStatusDisplay('processing');
+                            updateControlVisibility('processing');
+                            if (!statusInterval) statusInterval = setInterval(checkStatus, 2000);
+                            setTimeout(() => location.reload(), 1000);
+                        }, 500);
+                    },
+                    error: function(_, __, err) {
+                        clearInterval(interval);
+                        alert('Erreur lors de l\'upload : ' + err);
+                        $('.progress-container').slideUp();
+                    }
+                });
+
+                return false;
+            });
+
+            // Bouton pour stopper l’analyse
+            $('#stop-btn').click(() => {
+                $.post('/stop_video', () => {
+                    updateStatusDisplay('idle');
+                    updateControlVisibility('idle');
+                    clearInterval(statusInterval);
+                    statusInterval = null;
+                    resetVideoFeed();
+                });
+            });
+
+            // Supprimer une vidéo avec effet et confirmation
+            $('.action-btn.delete').click(function(e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                const item = $(this).closest('.video-item');
+                if (confirm('Êtes-vous sûr ?')) {
+                    $.get(url, function(response) {
+                        if (response.status === 'success') {
+                            item.addClass('animate__fadeOutRight');
+                            setTimeout(() => {
+                                item.remove();
+                                if ($('.video-item').length === 0) {
+                                    $('.video-list').html(`
+                                        <div class="empty-state animate__animated animate__fadeIn">
+                                            <div class="empty-icon"><i class="fas fa-film"></i></div>
+                                            <p>Aucune vidéo traitée pour le moment</p>
+                                        </div>
+                                    `);
+                                }
+                            }, 500);
+                        }
+                    });
+                }
+            });
+
+            // Initialisation à l'état actuel
+            updateStatusDisplay("{{ status }}");
+            updateControlVisibility("{{ status }}");
+        });
+
+        // Récupération régulière du statut
+        function checkStatus() {
+            $.get('/get_status', function(data) {
+                updateStatusDisplay(data.status);
+                updateControlVisibility(data.status);
+                if (data.status === 'completed' || data.status === 'idle') {
+                    clearInterval(statusInterval);
+                    statusInterval = null;
+                    if (data.status === 'idle') resetVideoFeed();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
