@@ -12,6 +12,8 @@ import os
 import shutil
 
 from tracker import Tracker  # Classe de suivi personnalisé
+latest_processed_filename = None
+
 
 # Initialisation Flask
 app = Flask(__name__)
@@ -65,14 +67,16 @@ class VideoProcessor:
         self.frame_height = 0
         self.last_frame = None
         self.is_video_active = False
+        global latest_processed_filename
+        self.latest_processed_filename = latest_processed_filename
 
         # Threads
         self.detection_thread = None
         self.save_thread = None
 
         # Files
-        self.frame_queue = queue.Queue(maxsize=30)
-        self.result_queue = queue.Queue(maxsize=30)
+        self.frame_queue = queue.Queue(maxsize=60)
+        self.result_queue = queue.Queue(maxsize=60)
         self.processed_frames = []
 
         # Export
@@ -181,6 +185,9 @@ class VideoProcessor:
         if self.is_saving or not self.processed_frames:
             return
         self.is_saving = True
+        global latest_processed_filename
+        output_filename = f"processed_{os.path.basename(self.video_path)}"
+        self.current_output_path = os.path.join(Config.OUTPUT_FOLDER, output_filename)
         try:
             h, w = self.processed_frames[0].shape[:2]
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -189,6 +196,7 @@ class VideoProcessor:
                 video_writer.write(frame)
             video_writer.release()
             print(f"Vidéo sauvegardée à: {self.current_output_path}")
+            latest_processed_filename = output_filename # Mettre à jour le nom du dernier fichier
         except Exception as e:
             print(f"Erreur lors de la sauvegarde: {e}")
         finally:
@@ -212,10 +220,12 @@ video_processor = VideoProcessor()
 
 @app.route('/')
 def index():
-    processed_videos = os.listdir(Config.OUTPUT_FOLDER) if os.path.exists(Config.OUTPUT_FOLDER) else []
-    processed_videos = [f for f in processed_videos if f.lower().endswith(tuple(Config.ALLOWED_EXTENSIONS))]
+    upload_folder = app.config['UPLOAD_FOLDER']
+    processed_videos_folder = Config.OUTPUT_FOLDER
+    uploaded_videos = [f for f in os.listdir(upload_folder) if os.path.isfile(os.path.join(upload_folder, f)) and f.lower().endswith(tuple(Config.ALLOWED_EXTENSIONS))] if os.path.exists(upload_folder) else []
+    processed_videos = [f for f in os.listdir(processed_videos_folder) if os.path.isfile(os.path.join(processed_videos_folder, f)) and f.lower().endswith(tuple(Config.ALLOWED_EXTENSIONS))] if os.path.exists(processed_videos_folder) else []
     status = "completed" if video_processor.end_of_video else "processing" if video_processor.processing else "idle"
-    return render_template("index.html", processed_videos=processed_videos,
+    return render_template("index.html", uploaded_videos=uploaded_videos, processed_videos=processed_videos,
                            status=status, is_saving=video_processor.is_saving,
                            is_video_active=video_processor.is_video_active)
 
@@ -283,6 +293,11 @@ def download_file(filename):
     path = os.path.join(Config.OUTPUT_FOLDER, filename)
     return send_file(path, as_attachment=True) if os.path.exists(path) else ("Fichier non trouvé", 404)
 
+@app.route('/get_latest_processed_filename')
+def get_latest_processed_filename():
+    global latest_processed_filename
+    return {"filename": latest_processed_filename}
+
 @app.route('/delete_processed/<filename>')
 def delete_processed(filename):
     os.remove(os.path.join(Config.OUTPUT_FOLDER, filename))
@@ -306,6 +321,6 @@ if __name__ == '__main__':
     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
     os.makedirs(Config.OUTPUT_FOLDER, exist_ok=True)
     try:
-        app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+        app.run(debug=False, host='0.0.0.0', port=5000, threaded=True)
     finally:
         video_processor.stop()

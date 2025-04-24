@@ -1,349 +1,255 @@
-:root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --accent-color: #e74c3c;
-            --dark-color: #2c3e50;
-            --light-color: #ecf0f1;
-        }
+/* style.css */
 
-        body {
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
 
-        .main-container {
-            padding: 30px 20px;
-        }
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-        .card {
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin-bottom: 25px;
-            border: none;
-        }
+h1, h2 {
+    color: #337ab7;
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
+.upload-section, .video-selection, .video-display, .processed-videos-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
 
-        .card-header {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 20px;
-            font-weight: 600;
-        }
+/* Section de téléchargement */
+.upload-section h2 {
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
 
-        .video-container {
-            position: relative;
-            text-align: center;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 15px;
-            overflow: hidden;
-        }
+.upload-section form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
 
-        .video-feed {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.5s ease;
-        }
+.upload-section input[type="file"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
 
-        .video-feed:hover {
-            transform: scale(1.02);
-        }
+.upload-section button[type="submit"],
+#deleteAllUploadsBtn {
+    padding: 10px 15px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-        .status-display {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.8);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+.upload-section button[type="submit"]:hover,
+#deleteAllUploadsBtn:hover {
+    background-color: #4cae4c;
+}
 
-        .status-badge {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+#deleteAllUploadsBtn {
+    background-color: #d9534f;
+}
 
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
+#deleteAllUploadsBtn:hover {
+    background-color: #c9302c;
+}
 
-        .btn {
-            border-radius: 30px;
-            padding: 12px 25px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
+/* Section de sélection de vidéo */
+.video-selection h2 {
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
 
-        .btn::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-        }
+.video-selection select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            z-index: -1;
-        }
+.video-selection button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-        .btn:hover::before {
-            width: 100%;
-        }
+#startProcessingBtn {
+    background-color: #007bff;
+    color: white;
+    margin-right: 10px;
+}
 
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
+#startProcessingBtn:hover {
+    background-color: #0056b3;
+}
 
-        .btn-success {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
+#stopProcessingBtn {
+    background-color: #ffc107;
+    color: #333;
+}
 
-        .btn-danger {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
+#stopProcessingBtn:hover {
+    background-color: #e0a800;
+}
 
-        .upload-section {
-            padding: 25px;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-        }
+#startProcessingBtn:disabled,
+#stopProcessingBtn:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
 
-        .upload-area {
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+/* Section d'affichage vidéo */
+.video-display h2 {
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
 
-        .upload-area:hover, .upload-area.dragover {
-            border-color: var(--primary-color);
-            background-color: rgba(52, 152, 219, 0.05);
-        }
+#videoFeed {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
 
-        .upload-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
+#processingStatus {
+    font-style: italic;
+    color: #777;
+}
 
-        .file-input {
-            display: none;
-        }
+/* Section des vidéos traitées (Mise à jour avec Grid Layout) */
+.processed-videos-section h2 {
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
 
-        .file-name {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #666;
-        }
+.processed-videos-section ul {
+    display: grid;
+    grid-template-columns: 1fr auto auto; /* Une colonne flexible pour le titre, une pour chaque bouton */
+    gap: 10px; /* Espacement entre les colonnes et les lignes */
+    list-style: none;
+    padding: 0;
+}
 
-        .progress-container {
-            display: none;
-            margin-top: 15px;
-        }
+.processed-videos-section li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    display: contents; /* Permet aux enfants de participer à la grille du parent */
+}
 
-        .progress {
-            height: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-        }
+.processed-videos-section li > span { /* Le titre */
+    grid-column: 1 / 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    align-self: center; /* Aligner verticalement au centre dans la cellule de la grille */
+}
 
-        .progress-bar {
-            background-color: var(--primary-color);
-        }
+.processed-videos-section li a { /* Le lien Télécharger */
+    grid-column: 2 / 3;
+}
 
-        .video-list {
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
+.processed-videos-section li button.delete-btn { /* Le bouton Supprimer */
+    grid-column: 3 / 4;
+}
 
-        .video-item {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
+.processed-videos-section li:last-child {
+    border-bottom: none;
+}
 
-        .video-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+.processed-videos-section li a,
+.processed-videos-section li button.delete-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none; /* Pour le lien */
+    color: white; /* Couleur du texte pour les boutons */
+    background-color: #007bff; /* Couleur par défaut pour le bouton Télécharger */
+}
 
-        .video-name {
-            font-weight: 500;
-            color: var(--dark-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+.processed-videos-section li a:hover {
+    background-color: #0056b3;
+    text-decoration: underline; /* Souligner au survol pour le lien */
+    color: white;
+}
 
-        .video-icon {
-            color: var(--primary-color);
-        }
+.processed-videos-section li button.delete-btn {
+    background-color: #d9534f; /* Couleur pour le bouton Supprimer */
+    color: white;
+}
 
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
+.processed-videos-section li button.delete-btn:hover {
+    background-color: #c9302c;
+}
 
-        .action-btn {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-            color: #666;
-            border: none;
-            transition: all 0.3s ease;
-        }
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 20px;
+    }
 
-        .action-btn:hover {
-            transform: scale(1.1);
-        }
+    .upload-section form {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-        .action-btn.delete {
-            background-color: #fee2e2;
-            color: var(--accent-color);
-        }
+    .upload-section input[type="file"],
+    .upload-section button[type="submit"],
+    #deleteAllUploadsBtn {
+        margin-bottom: 10px;
+    }
 
-        .action-btn.download {
-            background-color: #d1fae5;
-            color: var(--secondary-color);
-        }
+    .processed-videos-section ul {
+        grid-template-columns: 1fr; /* Une seule colonne sur les petits écrans */
+    }
 
-        .processing-spinner {
-            width: 20px;
-            height: 20px;
-        }
+    .processed-videos-section li {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
 
-        .empty-state {
-            text-align: center;
-            padding: 30px 20px;
-            color: #666;
-        }
+    .processed-videos-section li > span {
+        width: 100%; /* Le titre prend toute la largeur */
+    }
 
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #ccc;
-        }
-
-        .home-button {
-            margin-bottom: 25px;
-        }
-
-        .page-title {
-            text-align: center;
-            margin-bottom: 40px;
-            color: var(--dark-color);
-            font-weight: 700;
-            position: relative;
-            padding-bottom: 15px;
-        }
-
-        .page-title:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 2px;
-        }
-
-        /* Animations personnalisées */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        /* Styles pour la scrollbar */
-        .video-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .video-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .video-list::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        .video-list::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-            }
-
-            .video-item {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-
-            .action-buttons {
-                margin-top: 10px;
-            }
-        }
+    .processed-videos-section li a,
+    .processed-videos-section li button.delete-btn {
+        margin-left: 0;
+        width: 100%; /* Les boutons prennent toute la largeur sur les petits écrans */
+        margin-top: 5px;
+    }
+}
