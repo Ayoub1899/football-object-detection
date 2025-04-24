@@ -19,6 +19,7 @@ Cette application web permet de détecter en **temps réel** les **joueurs**, **
 3. **Installer les dépendances :**
    ```bash
    pip install -r requirements.txt
+   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
    ```
 **Prérequis**
 - Python 3.8+
