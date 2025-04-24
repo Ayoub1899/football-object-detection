@@ -3,58 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traitement Vidéo</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Vision par ordinateur - Football</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
+    <header>
+        <div class="container">
+            <h1>Détection de joueurs, arbitres et ballon en temps réel</h1>
+        </div>
+    </header>
+
     <div class="container">
-        <h1>Traitement Vidéo</h1>
+        <div class="main-content">
+            <div class="upload-section">
+                <div class="drag-area" id="dragArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Glissez et déposez une vidéo</h3>
+                    <p>OU</p>
+                    <button class="btn btn-primary" id="browseBtn">Parcourir les fichiers</button>
+                    <input type="file" id="fileInput" accept=".mp4,.avi,.mov,.mkv">
+                </div>
+            </div>
 
-        <div class="upload-section">
-            <h2>Télécharger une vidéo</h2>
-            <form method="POST" action="/upload" enctype="multipart/form-data">
-                <input type="file" name="file" accept=".mp4,.avi,.mov,.mkv" required>
-                <button type="submit">Envoyer</button>
-            </form>
-            <button id="deleteAllUploadsBtn">Supprimer toutes les vidéos importées</button>
-        </div>
+            <div class="video-section">
+                <div class="video-container">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        <p>Aucune vidéo chargée</p>
+                    </div>
+                    <img src="" id="videoFeed" alt="Flux vidéo">
+                </div>
 
-        <div class="video-selection">
-            <h2>Sélectionner une vidéo à traiter</h2>
-            <select id="videoList">
-                <option value="" disabled selected>Sélectionner une vidéo</option>
-                {% for video in uploaded_videos %}
-                <option value="{{ video }}">{{ video }}</option>
-                {% endfor %}
-            </select>
-            <button id="startProcessingBtn" disabled>Démarrer le traitement</button>
-            <button id="stopProcessingBtn" disabled>Arrêter le traitement</button>
-        </div>
+                <div class="progress-bar-container" id="progressBarContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
 
-        <div class="video-display">
-            <h2>Flux Vidéo en Direct</h2>
-            <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Flux vidéo en direct">
-            <p id="processingStatus">Statut: {{ status }} {% if is_saving %} (Sauvegarde en cours...){% endif %}</p>
-        </div>
+                <div id="spinner" class="spinner"></div>
+                <p id="statusMessage"></p>
 
-        <div class="processed-videos-section">
-            <h2>Vidéos Traitées</h2>
-            {% if processed_videos %}
-            <ul>
-                {% for video in processed_videos %}
-                <li>
-                    {{ video }}
-                    <a href="/download/{{ video }}" download>Télécharger</a>
-                    <button class="delete-btn" data-filename="{{ video }}">Supprimer</button>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p>Aucune vidéo traitée pour le moment.</p>
-            {% endif %}
+            </div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments du DOM
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.getElementById('browseBtn');
+            const dragArea = document.getElementById('dragArea');
+            const videoFeed = document.getElementById('videoFeed');
+            const videoPlaceholder = document.getElementById('videoPlaceholder');
+            const spinner = document.getElementById('spinner');
+            const statusMessage = document.getElementById('statusMessage');
+
+            // Variables de l'application
+            let processingVideo = false;
+            let statusCheckInterval;
+            let progressUpdateInterval;
+
+
+            // Gestion du glisser-déposer
+            ['dragover', 'dragenter'].forEach(eventName => {
+                dragArea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dragArea.classList.add('active');
+                });
+            });
+
+            ['dragleave', 'dragend'].forEach(eventName => {
+                dragArea.addEventListener(eventName, () => {
+                    dragArea.classList.remove('active');
+                });
+            });
+
+            dragArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragArea.classList.remove('active');
+
+                const file = e.dataTransfer.files[0];
+                if (file && isValidVideo(file)) {
+                    uploadVideo(file);
+                } else {
+                    showStatus("Format vidéo non supporté. Utilisez MP4, AVI, MOV ou MKV.", "error");
+                }
+            });
+
+            // Bouton parcourir
+            browseBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Sélection de fichier
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file && isValidVideo(file)) {
+                    uploadVideo(file);
+                } else if (file) {
+                    showStatus("Format vidéo non supporté. Utilisez MP4, AVI, MOV ou MKV.", "error");
+                }
+            });
+
+            window.addEventListener('beforeunload', function(e) {
+                if (processingVideo) {
+            // Envoyer une requête pour nettoyer le traitement côté serveur
+                    fetch('/cleanup', {
+                        method: 'POST',
+                        keepalive: true // Important pour que la requête ait le temps de partir
+                    });
+                }
+            });
+
+
+
+            // Télécharger le fichier
+            async function uploadVideo(file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Réinitialiser l'interface
+                resetInterface();
+                spinner.style.display = 'block';
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+
+
+                        startVideoProcessing();
+                    } else {
+                        showStatus("Erreur lors du chargement de la vidéo.", "error");
+                        spinner.style.display = 'none';
+                    }
+                } catch (error) {
+                    showStatus("Erreur de connexion au serveur.", "error");
+                    spinner.style.display = 'none';
+                }
+            }
+
+            // Démarrer le traitement vidéo
+            function startVideoProcessing() {
+                processingVideo = true;
+                videoPlaceholder.style.display = 'none';
+                videoFeed.style.display = 'block';
+                videoFeed.src = '/video_feed?' + new Date().getTime();
+            }
+
+            // Mettre à jour la barre de progression
+            let progressValue = 0;
+
+            // Vérifier l'état du traitement
+            async function checkProcessingStatus() {
+                try {
+                    const response = await fetch('/get_status');
+                    const data = await response.json();
+
+                    if (data.status === 'completed') {
+                        handleProcessingComplete()
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la vérification du statut:", error);
+                }
+            }
+
+            // Gérer la fin du traitement
+            async function handleProcessingComplete() {
+                clearInterval(statusCheckInterval);
+                clearInterval(progressUpdateInterval);
+                processingVideo = false;
+                progressValue = 100;
+            }
+
+
+
+            // Réinitialiser l'interface
+            function resetInterface() {
+                if (statusCheckInterval) clearInterval(statusCheckInterval);
+                if (progressUpdateInterval) clearInterval(progressUpdateInterval);
+
+                videoFeed.style.display = 'none';
+                videoPlaceholder.style.display = 'flex';
+                progressValue = 0;
+                spinner.style.display = 'none';
+                statusMessage.textContent = '';
+                processingVideo = false;
+            }
+
+            // Afficher un message de statut
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = '';
+
+                if (type === 'error') {
+                    statusMessage.style.color = '#e74c3c';
+                } else if (type === 'processing') {
+                    statusMessage.style.color = '#f39c12';
+                } else if (type === 'completed') {
+                    statusMessage.style.color = '#27ae60';
+                } else {
+                    statusMessage.style.color = '#7f8c8d';
+                }
+            }
+
+            function isValidVideo(file) {
+
+                const validExtensions = ['.mp4', '.avi', '.mov', '.mkv'];
+
+                const fileName = file.name.toLowerCase();
+
+                return validExtensions.some(ext => fileName.endsWith(ext));
+
+            }
+        });
+    </script>
 </body>
 </html>

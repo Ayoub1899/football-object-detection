@@ -1,255 +1,125 @@
-/* style.css */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .upload-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .video-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        #videoFeed {
+            width: 100%;
+            border-radius: 4px;
+            display: none;
+        }
+        #fileInput {
+            display: none;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-body {
-    font-family: sans-serif;
-    margin: 20px;
-    background-color: #f4f4f4;
-    color: #333;
-}
 
-.container {
-    max-width: 960px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+        .drag-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .drag-area.active {
+            border-color: #2ecc71;
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        .drag-area i {
+            font-size: 50px;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        .drag-area h3 {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+        .drag-area p {
+            margin: 0;
+            color: #7f8c8d;
+        }
 
-h1, h2 {
-    color: #337ab7;
-    text-align: center;
-    margin-bottom: 20px;
-}
 
-.upload-section, .video-selection, .video-display, .processed-videos-section {
-    margin-bottom: 30px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-/* Section de téléchargement */
-.upload-section h2 {
-    text-align: left;
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-.upload-section form {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.upload-section input[type="file"] {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.upload-section button[type="submit"],
-#deleteAllUploadsBtn {
-    padding: 10px 15px;
-    background-color: #5cb85c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.upload-section button[type="submit"]:hover,
-#deleteAllUploadsBtn:hover {
-    background-color: #4cae4c;
-}
-
-#deleteAllUploadsBtn {
-    background-color: #d9534f;
-}
-
-#deleteAllUploadsBtn:hover {
-    background-color: #c9302c;
-}
-
-/* Section de sélection de vidéo */
-.video-selection h2 {
-    text-align: left;
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-.video-selection select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-bottom: 15px;
-}
-
-.video-selection button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#startProcessingBtn {
-    background-color: #007bff;
-    color: white;
-    margin-right: 10px;
-}
-
-#startProcessingBtn:hover {
-    background-color: #0056b3;
-}
-
-#stopProcessingBtn {
-    background-color: #ffc107;
-    color: #333;
-}
-
-#stopProcessingBtn:hover {
-    background-color: #e0a800;
-}
-
-#startProcessingBtn:disabled,
-#stopProcessingBtn:disabled {
-    background-color: #ccc;
-    color: #666;
-    cursor: not-allowed;
-}
-
-/* Section d'affichage vidéo */
-.video-display h2 {
-    text-align: left;
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-#videoFeed {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    border: 1px solid #bbb;
-    border-radius: 4px;
-    margin-bottom: 10px;
-}
-
-#processingStatus {
-    font-style: italic;
-    color: #777;
-}
-
-/* Section des vidéos traitées (Mise à jour avec Grid Layout) */
-.processed-videos-section h2 {
-    text-align: left;
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-.processed-videos-section ul {
-    display: grid;
-    grid-template-columns: 1fr auto auto; /* Une colonne flexible pour le titre, une pour chaque bouton */
-    gap: 10px; /* Espacement entre les colonnes et les lignes */
-    list-style: none;
-    padding: 0;
-}
-
-.processed-videos-section li {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    display: contents; /* Permet aux enfants de participer à la grille du parent */
-}
-
-.processed-videos-section li > span { /* Le titre */
-    grid-column: 1 / 2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    align-self: center; /* Aligner verticalement au centre dans la cellule de la grille */
-}
-
-.processed-videos-section li a { /* Le lien Télécharger */
-    grid-column: 2 / 3;
-}
-
-.processed-videos-section li button.delete-btn { /* Le bouton Supprimer */
-    grid-column: 3 / 4;
-}
-
-.processed-videos-section li:last-child {
-    border-bottom: none;
-}
-
-.processed-videos-section li a,
-.processed-videos-section li button.delete-btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    text-decoration: none; /* Pour le lien */
-    color: white; /* Couleur du texte pour les boutons */
-    background-color: #007bff; /* Couleur par défaut pour le bouton Télécharger */
-}
-
-.processed-videos-section li a:hover {
-    background-color: #0056b3;
-    text-decoration: underline; /* Souligner au survol pour le lien */
-    color: white;
-}
-
-.processed-videos-section li button.delete-btn {
-    background-color: #d9534f; /* Couleur pour le bouton Supprimer */
-    color: white;
-}
-
-.processed-videos-section li button.delete-btn:hover {
-    background-color: #c9302c;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        margin: 10px;
-        padding: 20px;
-    }
-
-    .upload-section form {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .upload-section input[type="file"],
-    .upload-section button[type="submit"],
-    #deleteAllUploadsBtn {
-        margin-bottom: 10px;
-    }
-
-    .processed-videos-section ul {
-        grid-template-columns: 1fr; /* Une seule colonne sur les petits écrans */
-    }
-
-    .processed-videos-section li {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-
-    .processed-videos-section li > span {
-        width: 100%; /* Le titre prend toute la largeur */
-    }
-
-    .processed-videos-section li a,
-    .processed-videos-section li button.delete-btn {
-        margin-left: 0;
-        width: 100%; /* Les boutons prennent toute la largeur sur les petits écrans */
-        margin-top: 5px;
-    }
-}
+        .video-placeholder {
+            width: 100%;
+            height: 450px;
+            background-color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            color: #7f8c8d;
+        }
