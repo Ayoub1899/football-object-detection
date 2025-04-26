@@ -1,6 +1,6 @@
 # ⚽ Application Flask - Détection en temps réel de scènes de football
 
-Cette application web permet de détecter en **temps réel** les **joueurs**, **arbitres**, **gardiens** et le **ballon** dans une vidéo de match de football grâce à un modèle **YOLOv11**. L’utilisateur peut uploader une vidéo, suivre le traitement en direct, stopper ou télécharger la vidéo annotée.
+Cette application web permet de détecter en **temps réel** les **joueurs**, **arbitres**, **gardiens** et le **ballon** dans une vidéo de match de football grâce à un modèle **YOLOv11**. L’utilisateur peut uploader une vidéo et suivre le traitement en direct.
 
 ---
 
@@ -40,7 +40,3 @@ http://127.0.0.1:5000
 - Détection en temps réel via un fichier
 
 - Visualisation du flux avec les annotations
-
-- Téléchargement des vidéos traitées
-
-- Historique des vidéos traitées
