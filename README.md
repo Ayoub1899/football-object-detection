@@ -22,7 +22,7 @@ Cette application web permet de détecter en **temps réel** les **joueurs**, **
    pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu118
    ```
 **Prérequis**
-- Python 3.8+
+- Python entre 3.9 et 3.12
 
 **Utilisation :**
 1. Lancer l'application Flask :
