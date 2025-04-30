@@ -40,3 +40,5 @@ http://127.0.0.1:5000
 - Détection en temps réel via un fichier
 
 - Visualisation du flux avec les annotations
+
+NB : Pour des résultats optimaux, privilégiez des vidéos de 720p
